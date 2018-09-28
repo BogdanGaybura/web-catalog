@@ -1,0 +1,66 @@
+{% extends 'layout.twig' %}
+
+{% block content %} 
+    <table id="example" class="display" style="width:100%">
+        <caption>Матеріальні цінності ХПТК ОНПУ <a href="{{path('add')}}">Додати матеріальну цінність</a></caption>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Інвентарний номер</th> 
+                <th>Постачальник</th>
+                <th>Номер кабінету</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for matworth in matworths %}
+                <tr>
+                    <td>{{ matworth.id_matworth }}</td>
+                    <td>{{ matworth.inventory_num }}</td>
+                    <td>{{ matworth.name_provider }}</td>
+                    <td>{{ matworth.num_cab }}</td>
+                    <td>
+                        <form method="get" action="{{path('view')}}">  
+                            <input type="hidden" name="id_matworth" value="{{ matworth.id_matworth }}">
+                            <input type="submit" value="Детальніше" class="btn">
+                        </form>
+                    </td>
+                    <td>
+                        <form method="get" action="{{path('edit')}}">
+                            <input type="hidden" name="id_matworth" value="{{ matworth.id_matworth }}">
+                            <input type="submit" value="Редагувати" class="btn btn-warning">
+                        </form>
+                    </td>
+                    <td>
+                        <form onsubmit="Del(this);
+                                return false;" method="post" action="{{path('delete')}}">
+                            <input type="hidden" name="id_matworth" value="{{ matworth.id_matworth }}">
+                            <input type="submit" value="Видалити" class="btn btn-danger">       
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>#</th>
+                <th>Інвентарний номер</th>
+                <th>Постачальник</th>
+                <th>Номер кабінету</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>       
+    <script>
+        function Del(f) {
+            if (confirm("Дійсно бажаєте видалити мат. цінність?"))
+                f.submit();
+        }
+    </script>
+{% endblock %}		
+
+
