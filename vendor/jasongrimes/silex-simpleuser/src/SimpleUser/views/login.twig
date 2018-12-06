@@ -7,7 +7,7 @@
     {% if app.user %}
         <p>Доброго дня, {{ app.user.displayName }}.</p>
         <p><a href="{{ path('user.logout') }}">Вийти</a></p>
-        <p><a href="{{ path('matworths') }}">Перегляд бази</a></p>
+        <p><a href="{{ path('admin.items') }}">Перегляд бази</a></p>
     {% else %}
         <h1>
             Sign in

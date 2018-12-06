@@ -1,141 +1,142 @@
 <?php
 
-$app->get('/matworths', function () use ($app) {
-    $conn = $app['db'];
-    $matworths = $conn->fetchAll('SELECT id_matworth, inventory_num, name_provider, num_cab  FROM main_view');
-    return $app['twig']->render('matworths.twig', ['matworths' => $matworths]);
-})->bind('matworths');
+$app->get('/admin/items/all', function () use ($app) {
+    $data['items'] = Polytech::getItemsList();
+    return $app['twig']->render('admin.items.twig', $data);
+})->bind('admin.items');
 
-$app->get('/matworths/add', function () use ($app) {
-    $conn = $app['db'];
-    $users = $conn->fetchAll('SELECT id, name FROM users WHERE roles = "ROLE_USER"');
-    $cabs = $conn->fetchAll('SELECT id_cab, num_cab FROM cab');
-    $providers = $conn->fetchAll('SELECT * FROM provider');
-    $types = $conn->fetchAll('SELECT * FROM type');
 
-    $token = $app['security']->getToken();
-    if (null !== $token) {
-        $user['id'] = $token->getUser()->getId();
-    }
+$app->get('/admin/items/add', function () use ($app) {
 
-    return $app['twig']->render('addmatw.twig', ['users' => $users,
-                'cabs' => $cabs,
-                'providers' => $providers,
-                'types' => $types,
-                'id_user' => $user['id']
-    ]);
-})->bind('add');
+    $request = $app['request'];
 
-$app->post('/matworths/add', function() use ($app) {
-    $conn = $app['db'];
-    $req = $app['request'];
+    $id_type = $request->query->get('id_type');
 
-    $inventory_num = $req->get('inventory_num');
-    $id_type = $req->get('id_type');
-    $id_provider = $req->get('id_provider');
-    $id_cab = $req->get('id_cab');
-    $id_user = $req->get('id_user');
-    $price = $req->get('price');
-
-    $conn->insert('material_worth', ['inventory_num' => $inventory_num,
-        'id_type' => $id_type,
-        'id_provider' => $id_provider,
-        'id_cab' => $id_cab,
-        'id_user' => $id_user,
-        'price' => $price
-    ]);
-
-    $id_matworth = $conn->lastInsertId();
-    $arCharact = $req->get('id_name_ch');
-    $arCharactValue = $req->get('value');
-
-    foreach ($arCharact as $chKey => $chItem) {
-        $conn->insert('ch', ['id_matworth' => $id_matworth,
-            'id_name_ch' => $chItem,
-            'value' => $arCharactValue[$chKey]]);
-    }
-
-    return $app->redirect($app['url_generator']->generate('view', array('id_matworth' => $id_matworth)));
-});
-
-$app->get('/matworths/edit', function () use ($app) {
-    $conn = $app['db'];
-
-    $req = $app['request'];
-    $id_matworth = $req->get('id_matworth');
-    $matworths = $conn->fetchAll('SELECT inventory_num, price FROM main_view WHERE id_matworth = ?', [$id_matworth]);
-    $users = $conn->fetchAll('SELECT id, name FROM users WHERE roles = "ROLE_USER"');
-    $cabs = $conn->fetchAll('SELECT id_cab, num_cab FROM cab');
-    $providers = $conn->fetchAll('SELECT * FROM provider');
-    $types = $conn->fetchAll('SELECT * FROM type');
+    $response = DropDownList::getNameChByIdType($id_type);
+    $chs = json_encode($response);
     
+    $users = DropDownList::getUsersByUserRole();
+    $cabs = DropDownList::getCab();
+    $providers = DropDownList::getProvider();
+    $types = DropDownList::getType();
+   
+    return $app['twig']->render('admin.add.twig', ['users' => $users,
+                'cabs' => $cabs,
+                'providers' => $providers,
+                'types' => $types,
+                'chs' => $chs]);
+})->bind('admin.add');
+
+$app->post('/admin/items/add', function() use ($app) {
+    $request = $app['request'];
+
+    $data['inv_num'] = $request->request->get('inv_num');
+    $data['id_type'] = $request->request->get('id_type');
+    $data['id_provider'] = $request->request->get('id_provider');
+    $data['id_cab'] = $request->request->get('id_cab');
+    $data['id_user'] = $request->request->get('id_user');
+    $data['price'] = $request->request->get('price');
+
+    $app['db']->insert('item', $data);
+
+    $id_item = $app['db']->lastInsertId();
+    $arCharact = $request->request->get('id_name_ch');
+    $arCharactValue = $request->request->get('value');
+
+    Polytech::pushChByItemId($id_item, $arCharact, $arCharactValue);
+
+    return $app->redirect($app['url_generator']->generate('admin.view', array('id_item' => $id_item), array('id_type' => $id_type), array('id_provider' => $id_provider), array('id_cab' => $id_cab), array('id_user' => $id_user)
+    ));
+});
+
+$app->get('/admin/item/update', function () use ($app) {
+    $post = $app['request'];
+
+    $id_item = $post->get('id_item'); 
+
+    $items = Current::getMainByItemId($id_item);
+
+    $types = DropDownList::getType();
+    $cur_type = Current::getTypeByItemId($id_item);
+
+    $providers = DropDownList::getProvider();
+    $cur_provider = Current::getProviderByItemId($id_item);
+
+    $cabs = DropDownList::getCab();
+    $cur_cab = Current::getCabByItemId($id_item);
+
+    $users = DropDownList::getUsersByUserRole();
+    $cur_user = Current::getUserByItemId($id_item);
+
+    $chs = DropDownList::getChByItemId($id_item);
+    $cur_ch = Current::getChValByItemId($id_item);
+var_dump($chs);
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! взять отсюда
     $token = $app['security']->getToken();
     if (null !== $token) {
         $user['id'] = $token->getUser()->getId();
     }
-
-    return $app['twig']->render('editmatw.twig', ['users' => $users,
-                'cabs' => $cabs,
-                'providers' => $providers,
+//===============================================================
+    return $app['twig']->render('admin.update.twig', ['id_item' => $id_item,
+                'items' => $items,
                 'types' => $types,
-                'id_user' => $user['id'],
-                'matworths' => $matworths
+                'cur_type' => $cur_type,
+                'providers' => $providers,
+                'cur_provider' => $cur_provider,
+                'cabs' => $cabs,
+                'cur_cab' => $cur_cab,
+                'users' => $users,
+                'cur_user' => $cur_user,
+                'chs' => $chs,
+                'cur_ch' => $cur_ch
     ]);
-})->bind('edit');
+})->bind('admin.update');
 
-$app->post('/matworths/edit', function() use ($app) {
-    $conn = $app['db'];
-    $req = $app['request'];
+$app->post('/admin/item/update', function() use ($app) {
+    $request = $app['request'];
+    
+    $id_item = $request->query->get('id_item');  
+    $inv_num = $request->request->get('inv_num');
+    $id_type = $request->request->get('id_type');
+    $id_provider = $request->request->get('id_provider');
+    $id_cab = $request->request->get('id_cab');
+    $id_user = $request->request->get('id_user');
+    $price = $request->request->get('price');
+    
+    $sql = "UPDATE item SET inv_num = ?, id_type = ?, id_provider = ?, id_cab = ?, id_user = ?, price = ? WHERE id_item = ?";
+        $app['db']->executeUpdate($sql, array($inv_num, $id_type, $id_provider, $id_cab, $id_user, $price, $id_item));
+    
+    $arCharact = $request->request->get('id_name_ch');
+    $arCharactValue = $request->request->get('value');
 
-    $inventory_num = $req->get('inventory_num');
-    $id_type = $req->get('id_type');
-    $id_provider = $req->get('id_provider');
-    $id_cab = $req->get('id_cab');
-    $id_user = $req->get('id_user');
-    $price = $req->get('price');
-
-    $conn->insert('material_worth', ['inventory_num' => $inventory_num,
-        'id_type' => $id_type,
-        'id_provider' => $id_provider,
-        'id_cab' => $id_cab,
-        'id_user' => $id_user,
-        'price' => $price
-    ]);
-
-    $id_matworth = $conn->lastInsertId();
-    $arCharact = $req->get('id_name_ch');
-    $arCharactValue = $req->get('value');
-
-    foreach ($arCharact as $chKey => $chItem) {
+    /**foreach ($arCharact as $chKey => $chItem) {
         $conn->insert('ch', ['id_matworth' => $id_matworth,
             'id_name_ch' => $chItem,
             'value' => $arCharactValue[$chKey]]);
     }
-
-    return $app->redirect($app['url_generator']->generate('view', array('id_matworth' => $id_matworth)));
+**/
+    return $app->redirect($app['url_generator']->generate('admin.view', array('id_item' => $id_item)));
 });
 
-$app->get('/matworths/view', function () use ($app) {
-    $conn = $app['db'];
-    $req = $app['request'];
-    $id_matworth = $req->get('id_matworth');
+$app->get('/admin/item/view', function () use ($app) {
+    $post = $app['request'];
+    $id_item = $post->get('id_item');
 
-    $matworths = $conn->fetchAll('SELECT * FROM main_view WHERE id_matworth = ?', [$id_matworth]);
-    $chs = $conn->fetchAll('SELECT * FROM ch_full WHERE id_matworth = ?', [$id_matworth]);
+    $data['items'] = Polytech::getItemsByItemId($id_item);
+    $data['chs'] = Polytech::getChByItemId($id_item);
 
-    return $app['twig']->render('viewmatw.twig', ['matworths' => $matworths,
-                'chs' => $chs]);
-})->bind('view');
-
+    return $app['twig']->render('admin.view.twig', ['items' => $data['items'],
+                'chs' => $data['chs']]);
+})->bind('admin.view');
 
 
-$app->post('/matworth/delete', function() use ($app) {
-    $conn = $app['db'];
-    $req = $app['request'];
-    $id_matworth = $req->get('id_matworth');
 
-    $conn->delete('material_worth', ['id_matworth' => $id_matworth]);
-    $conn->delete('ch', ['id_matworth' => $id_matworth]);
-    return $app->redirect($app['url_generator']->generate('matworths'));
-})->bind('delete');
+$app->post('/admin/item/delete', function() use ($app) {
+    $post = $app['request'];
+    $id_item = $post->get('id_item');
+
+    Polytech::delItem($id_item);
+    return $app->redirect($app['url_generator']->generate('admin.items'));
+})->bind('admin.delete');
 

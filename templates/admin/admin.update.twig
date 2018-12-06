@@ -1,0 +1,154 @@
+{% extends 'layout.twig' %}
+
+{% block content %} 
+    <form method="post" action="{{path('admin.update')}}" class="form-inline">
+        <fieldset>
+            <legend>Редагування</legend>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        {% for item in items %}
+                            Інвентарний номер <br>
+                            <input type="text" name="inv_num" value="{{ item.inv_num }}" id="check" maxlength="6" size="6" class="form-control" required/><br><br>
+                            <div>
+                                Тип <br>
+                                <select name="id_type" class="form-control" onchange="showNameCh(this.value)">          
+                                    {% for type in types %}
+                                        {% for cur in cur_type %}
+                                            {% if cur.id_type == type.id_type %}
+                                                <option selected value="{{ type.id_type }}">{{ type.name_type }}</option>
+                                            {% else %}		
+                                                <option value="{{ type.id_type }}">{{ type.name_type }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div><br>
+                            <div>
+                                Постачальник <br>
+                                <select name="id_provider" class="form-control">
+                                    {% for provider in providers %}
+                                        {% for cur in cur_provider %}
+                                            {% if cur.id_provider == provider.id_provider %}
+                                                <option selected value="{{ provider.id_provider }}">{{ provider.name_provider }}</option>
+                                            {% else %}		
+                                                <option value="{{ provider.id_provider }}">{{ provider.name_provider }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div><br>
+                            <div>
+                                Кабінет <br>
+                                <select name="id_cab" class="form-control">
+                                    {% for cab in cabs %}
+                                        {% for cur in cur_cab %}
+                                            {% if cur.id_cab == cab.id_cab %}
+                                                <option selected value="{{ cab.id_cab }}">{{ cab.num_cab }}</option>
+                                            {% else %}		
+                                                <option value="{{ cab.id_cab }}">{{ cab.num_cab }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select></div><br>
+                            <div>
+                                Користувач <br>
+                                <select name="id_user" class="form-control">
+                                    {% for user in users %}
+                                        {% for cur in cur_user %}
+                                            {% if cur.id == user.id %}
+                                                <option selected value="{{ user.id }}">{{ user.name }}</option>
+                                            {% else %}		
+                                                <option value="{{ user.id }}">{{ user.name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+
+                            </div><br>
+                            Ціна<br /><input type="text" name="price" value="{{ item.price }}" class="form-control" required> ₴<br><br>
+                        {% endfor %}
+                        <div>
+                            <button type="submit" class="btn btn-primary">Редагувати</button>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div id="parentId">
+                            <div id="NameCh">
+                                <nobr>
+                                    <a style="color:red;" onclick="return deleteField(this)" href="#">[—]</a>
+                                        {% for ch in chs %}
+                                        {% for cur in cur_ch %}
+                                            {% if cur.id_name_ch == ch.id_name_ch %}
+                                                 <select id="firstch" size="1" name="id_name_ch[1]" style="width:150px;" class="form-control">
+                                                <option selected value="{{ ch.id_name_ch }}">{{ ch.name_ch }}</option>
+                                                <input name="value[1]" type="text" style="width:300px;" class="form-control" required/>  
+                                            {% else %}		
+                                                <option value="{{ ch.id_name_ch }}">{{ ch.name_ch }}</option>
+                                                </select>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}   
+                                    
+                                    <a style="color:green;" onclick="return addField()" href="#">[+]</a></nobr>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+        </fieldset>  
+    </form>
+    <script>
+        var countOfFields = 1; // Текущее число полей
+        var curFieldNameId = 1; // Уникальное значение для атрибута name
+        var maxFieldLimit = 25; // Максимальное число возможных полей
+        function deleteField(a) {
+            if (countOfFields > 1)
+            {
+                // Получаем доступ к ДИВу, содержащему поле
+                var contDiv = a.parentNode;
+                // Удаляем этот ДИВ из DOM-дерева
+                contDiv.parentNode.removeChild(contDiv);
+                // Уменьшаем значение текущего числа полей
+                countOfFields--;
+            }
+            // Возвращаем false, чтобы не было перехода по сслыке
+            return false;
+        }
+        function addField() {
+            // Проверяем, не достигло ли число полей максимума
+            if (countOfFields >= maxFieldLimit) {
+                alert("Число полей достигло своего максимума = " + maxFieldLimit);
+                return false;
+            }
+            // Увеличиваем текущее значение числа полей
+            countOfFields++;
+            // Увеличиваем ID
+            curFieldNameId++;
+            // Создаем элемент ДИВ
+            var div = document.createElement("div");
+            // Добавляем HTML-контент с пом. свойства innerHTML
+            var options = document.getElementById("firstch").innerHTML;
+            //alert(sel);
+            div.innerHTML = '<nobr>' +
+                    '<a style="color:red;" onclick="return deleteField(this)" href="#">[—]</a>' +
+                    '<select size="1" name="id_name_ch[' + curFieldNameId + ']" style="width:150px;" class="form-control">' +
+                    options +
+                    '</select>' +
+                    '<input name="value[' + curFieldNameId + ']" type="text" style="width:300px;" class="form-control" /> ' +
+                    '<a style="color:green;" onclick="return addField()" href="#">[+]</a></nobr>';
+            // Добавляем новый узел в конец списка полей
+            document.getElementById("parentId").appendChild(div);
+            // Возвращаем false, чтобы не было перехода по сслыке
+            return false;
+        }
+    </script>
+
+    <script>
+        
+
+    </script>
+
+{% endblock %}		
+
+

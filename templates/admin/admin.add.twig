@@ -1,0 +1,190 @@
+{% extends 'layout.twig' %}
+
+{% block content %}
+    <form method="post" name="form1" action="{{path('admin.add')}}" class="form-inline">
+        <fieldset>
+            <legend>Додати матеріальну цінність</legend>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        Інвентарний номер <br/>
+                        <input type="text" name="inv_num" id="check" maxlength="6" minlength="6" size="6" class="form-control" required/>
+                        <br><br>
+                        <div>
+                            <select name="id_type" id="type" class="form-control">
+                                <option disabled selected >Оберіть тип</option>
+                                {% for type in types %}
+                                    <option value="{{ type.id_type }}">{{ type.name_type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div><br>
+                        <div>
+                            <select name="id_provider" class="form-control">
+                                <option disabled selected >Оберіть постачальника</option>
+                                {% for provider in providers %}
+                                    <option value="{{ provider.id_provider }}">{{ provider.name_provider }}</option>
+                                {% endfor %}
+                            </select>
+                        </div><br>
+                        <div>
+                            <select name="id_cab" class="form-control">
+                                <option disabled selected >Оберіть кабінет</option>
+                                {% for cab in cabs %}
+                                    <option value="{{ cab.id_cab }}">{{ cab.num_cab }}</option>
+                                {% endfor %}
+                            </select></div><br>
+                        <div>
+                            <select name="id_user" class="form-control">
+                                <option disabled selected >Оберіть користувача</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div><br>
+                        Ціна<br /><input type="text" name="price" class="form-control" required> ₴<br><br>       
+                        <div>
+                            <button type="submit" class="btn btn-primary" name="btn-add">Додати</button>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div id="parentId">
+                            <div id="NameCh">
+                                <nobr>
+                                    <a style="color:red;" onclick="return deleteField(this)" href="#">[—]</a>
+                                    <select id="firstch" size="1" name="id_name_ch[1]" style="width:150px;" class="form-control">  
+                                            <option value="0">Выберите из списка</option>
+                                    </select>
+                                    <input name="value[1]" type="text" style="width:300px;" class="form-control" required/>  
+                                    <a style="color:green;" onclick="return addField()" href="#">[+]</a></nobr>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <style>
+        .entry:not(:first-of-type)
+        {
+            margin-top: 10px;
+        }
+
+        .glyphicon
+        {
+            font-size: 12px;
+        }
+    </style>
+    <script>
+        document.getElementById('check').onkeydown = function (e) {
+            return !(/^[А-Яа-яA-Za-z ]$/.test(e.key));
+        }
+        var countOfFields = 1; // Текущее число полей
+        var curFieldNameId = 1; // Уникальное значение для атрибута name
+        var maxFieldLimit = 25; // Максимальное число возможных полей
+        function deleteField(a) {
+            if (countOfFields > 1)
+            {
+                // Получаем доступ к ДИВу, содержащему поле
+                var contDiv = a.parentNode;
+                // Удаляем этот ДИВ из DOM-дерева
+                contDiv.parentNode.removeChild(contDiv);
+                // Уменьшаем значение текущего числа полей
+                countOfFields--;
+            }
+            // Возвращаем false, чтобы не было перехода по сслыке
+            return false;
+        }
+        function addField() {
+            // Проверяем, не достигло ли число полей максимума
+            if (countOfFields >= maxFieldLimit) {
+                alert("Число полей достигло своего максимума = " + maxFieldLimit);
+                return false;
+            }
+            // Увеличиваем текущее значение числа полей
+            countOfFields++;
+            // Увеличиваем ID
+            curFieldNameId++;
+            // Создаем элемент ДИВ
+            var div = document.createElement("div");
+            // Добавляем HTML-контент с пом. свойства innerHTML
+            var options = document.getElementById("firstch").innerHTML;
+            //alert(sel);
+            div.innerHTML = '<nobr>' +
+                    '<a style="color:red;" onclick="return deleteField(this)" href="#">[—]</a>' +
+                    '<select size="1" name="id_name_ch[' + curFieldNameId + ']" style="width:150px;" class="form-control">' +
+                    options +
+                    '</select>' +
+                    '<input name="value[' + curFieldNameId + ']" type="text" style="width:300px;" class="form-control" /> ' +
+                    '<a style="color:green;" onclick="return addField()" href="#">[+]</a></nobr>';
+            // Добавляем новый узел в конец списка полей
+            document.getElementById("parentId").appendChild(div);
+            // Возвращаем false, чтобы не было перехода по сслыке
+            return false;
+        }
+
+        (function ($) {
+            "use strict";
+            $.extend({
+                request: function (options) {
+                    options = $.extend({
+                        type: "GET",
+                        url: "{{path('admin.add')}}",
+                        data: null,
+                        async: false,
+                        dataType: "json",
+                        before: null,
+                        error: function () {},
+                        complete: options.callback,
+                        success: function (result) {
+                            $.response.result = result;
+                        },
+                        result: null,
+                        callback: null
+                    }, options);
+                    options.before = function () {
+                        alert("ok before");
+                    };
+                    $.ajax({
+                        type: options.type,
+                        url: options.url,
+                        data: options.data,
+                        async: options.async,
+                        dataType: options.dataType,
+                        before: options.before,
+                        error: options.error,
+                        complete: options.complete,
+                        success: options.success
+                    });
+                    return this;
+                },
+                response: {
+                    result: {}
+                }
+            });
+
+            jQuery(function () {
+                $('#id_type').change(function () {
+                    var id_type = $(this).val();
+                    $('#firstch').prop('disabled', true)
+                            .find('option:not( :first )').remove();
+                    if (id_type != 0) {
+                        $.request({
+                            data: "{{path('admin.add')}}" + id_type,
+                        });
+                        var i = 0, chs = $.response.result;
+                        for (i; i < chs.length; i++) {
+                            $('#firstch').append('<option value="' + chs[i].id_name_ch + '">' + chs[i].name_ch + '</option>');
+                        }
+                        $('#firstch').prop('disabled', false);
+                    }
+                });
+            });
+        })(jQuery);
+
+
+
+    </script>
+
+{% endblock %}
+
+

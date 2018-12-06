@@ -5,8 +5,9 @@ date_default_timezone_set('Europe/Kiev');
 $loader = require_once __DIR__ . '/vendor/autoload.php';
 //$loader->add('RDA', __DIR__.'/classes');
 
-
-//require_once __DIR__.'/classes/ssp.class.php';
+require_once __DIR__ . '/classes/Polytech.php';
+require_once __DIR__ . '/classes/Current.php';
+require_once __DIR__ . '/classes/DropDownList.php';
 
 use Doctrine\DBAL\Connection;
 use Silex\Application;
@@ -36,7 +37,7 @@ $app->register(new Provider\SecurityServiceProvider(), array(
     'security.firewalls' => array(
         'secured_area' => array(
             'pattern' => '^.*$',
-            'anonymous' => true,
+            'anonymous' => true, 
             'remember_me' => array(),
             'form' => array(
                 'login_path' => '/user/login',
@@ -69,7 +70,8 @@ $app->register(new \Kilte\Silex\Pagination\PaginationServiceProvider, array('pag
 
 $app['twig.path'] = array(__DIR__ . '/templates',
     __DIR__ . '/templates/simpleuser',
-    __DIR__ . '/templates/common'
+    __DIR__ . '/templates/admin',
+    __DIR__ . '/templates/user'
 );
 
 $app->boot();
@@ -92,44 +94,43 @@ $app['user.options'] = array(
         'edit' => 'edit.twig',
         'list' => 'list.twig',
     ),
-);
- 
- 
+); 
 
-/*$app['security.role_hierarchy'] = array(
+
+
+/**$app['security.role_hierarchy'] = array(
     'ROLE_LOCALUSER' => array(),
-    'ROLE_ADMIN' => array('ROLE_LOCALUSER','ROLE_POV','ROLE_MANAGER' ),
-    'ROLE_ADMIN' => array('ROLE_LOCALUSER','ROLE_POV','ROLE_BOSS','ROLE_OFFICE','ROLE_MANAGER' ),
+    'ROLE_ADMIN' => array('ROLE_LOCALUSER', 'ROLE_POV', 'ROLE_MANAGER'),
+    'ROLE_ADMIN' => array('ROLE_LOCALUSER', 'ROLE_POV', 'ROLE_BOSS', 'ROLE_OFFICE', 'ROLE_MANAGER'),
 ); */
 
-/* $app['security.firewalls'] = array(
-  // Ensure that the login page is accessible to all
-  'login' => array(
-  'pattern' => '^/user/login$',
-  ),
-  'secured_area' => array(
-  'pattern' => '^.*$',
-  'anonymous' => true,
-  ),
-  ); */
+$app['security.firewalls'] = array(
+    'admin' => array(
+        'pattern' => '^/admin/',
+        'form' => array('login_path' => '/login', 'check_path' => '/admin/login_check'),
+        'users' => array(
+            'admin' => array('ROLE_ADMIN', '$2y$10$3i9/lVd8UOFIJ6PAMFt8gu3/r5g0qeCJvoSlLCsvMTythye19F77a'),
+        ),
+    ),
+);
 
-/*$app['security.access_rules'] = array(
-    array('^/admin*', 'ROLE_ADMIN'),
-    array('^.*$', 'IS_AUTHENTICATED_ANONYMOUSLY')
-); */
-
+$app['security.access_rules'] = array(
+    array('^/admin', 'ROLE_ADMIN', 'https'),
+    array('^.*$', 'ROLE_USER'),
+);
 
 
-/*
-  $app['user.passwordStrengthValidator'] = $app->protect(function(SimpleUser\User $user, $password) {
-  if (strlen($password) < 4) {
-  return 'Password must be at least 4 characters long.';
-  }
-  if (strtolower($password) == strtolower($user->getName())) {
-  return 'Your password cannot be the same as your name.';
-  }
-  });
- */
+
+
+$app['user.passwordStrengthValidator'] = $app->protect(function(SimpleUser\User $user, $password) {
+    if (strlen($password) < 4) {
+        return 'Password must be at least 4 characters long.';
+    }
+    if (strtolower($password) == strtolower($user->getName())) {
+        return 'Your password cannot be the same as your name.';
+    }
+});
+
 
 
 

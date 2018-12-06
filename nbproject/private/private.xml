@@ -3,11 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/xampp/htdocs/templates/admin/admin.add.twig</file>
+            <file>file:/C:/xampp/htdocs/classes/DropDownList.php</file>
             <file>file:/C:/xampp/htdocs/templates/simpleuser/layout.twig</file>
-            <file>file:/C:/xampp/htdocs/templates/simpleuser/login.twig</file>
-            <file>file:/C:/xampp/htdocs/app.php</file>
+            <file>file:/C:/xampp/htdocs/templates/admin/admin.update.twig</file>
+            <file>file:/C:/xampp/htdocs/classes/Polytech.php</file>
+            <file>file:/C:/xampp/htdocs/classes/Current.php</file>
+            <file>file:/C:/xampp/htdocs/templates/admin/admin.view.twig</file>
+            <file>file:/C:/xampp/htdocs/templates/admin/admin.items.twig</file>
             <file>file:/C:/xampp/htdocs/controllers/admin/default.php</file>
-            <file>file:/C:/xampp/htdocs/controllers/user/default.php</file>
+            <file>file:/C:/xampp/htdocs/app.php</file>
         </group>
     </open-files>
 </project-private>

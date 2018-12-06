@@ -1,0 +1,32 @@
+{% extends 'layout.twig' %}
+
+{% block content %} 
+                  
+  <table class="table table-bordered">
+      {% for item in items %}
+      <caption>Детальніше про інв. {{ item.inv_num }}</caption>
+            <tbody>
+                    <tr><th class="success">Ціна</th>   
+                    <td class="active">{{ item.price }} ₴</td></tr>
+                    <tr><th class="success">Постачальник</th>
+                    <td class="active">{{ item.name_provider }}</td></tr>
+                    <tr><th class="success">Кабінет</th>
+                    <td class="active">{{ item.num_cab }}</td></tr>
+                    <tr><th class="success">Користувач</th>
+                    <td class="active">{{ item.user_name }}</td></tr>
+                {% endfor %}            
+            </table>
+    <table class="table table-bordered"> 
+        <caption >Характеристики</caption>
+        {% for ch in chs %}    
+        <tr><th class="success">{{ ch.name_ch }}</th>
+        <td class="active">{{ ch.value }}</td></tr>
+        {% endfor %}
+            </tbody>             
+        </table><br>
+             
+      <a href="{{path('admin.items')}}"><-- Повернутися до каталогу</a><a href="{{path('admin.add')}}">Додати --></a>
+        
+{% endblock %}		
+
+
